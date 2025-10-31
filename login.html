@@ -26,14 +26,14 @@
   <script>
     const loginBtn = document.getElementById('loginBtn');
     const loginMsg = document.getElementById('loginMsg');
-    loginBtn.addEventListener('click', async ()=>{
+    loginBtn.addEventListener('click', async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const res = await appAuth.login(email, password);
-      if(res.success){
-        if(res.role==='admin') window.location.href='admin-dashboard.html';
-        else if(res.role==='farmer') window.location.href='farmer-dashboard.html';
-        else window.location.href='buyer-dashboard.html';
+      if (res.success) {
+        if (res.role === 'admin') window.location.href = 'admin-dashboard.html';
+        else if (res.role === 'farmer') window.location.href = 'farmer-dashboard.html';
+        else window.location.href = 'buyer-dashboard.html';
       } else loginMsg.textContent = res.message;
     });
   </script>
