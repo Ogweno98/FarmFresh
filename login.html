@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login — FamFresh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-50 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-6 rounded shadow w-80">
+    <h1 class="text-xl font-bold mb-4">Login to FamFresh</h1>
+    <div class="space-y-3">
+      <input id="email" type="email" placeholder="Email" class="w-full border px-3 py-2 rounded">
+      <input id="password" type="password" placeholder="Password" class="w-full border px-3 py-2 rounded">
+      <button id="loginBtn" class="w-full bg-green-700 text-white py-2 rounded">Login</button>
+      <p class="text-xs text-gray-500 text-center">Don't have an account? <a href="register.html" class="text-blue-600">Register</a></p>
+      <p id="loginMsg" class="text-red-500 text-xs"></p>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="app-full.js"></script>
+
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const loginMsg = document.getElementById('loginMsg');
+    loginBtn.addEventListener('click', async ()=>{
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const res = await appAuth.login(email, password);
+      if(res.success){
+        if(res.role==='admin') window.location.href='admin-dashboard.html';
+        else if(res.role==='farmer') window.location.href='farmer-dashboard.html';
+        else window.location.href='buyer-dashboard.html';
+      } else loginMsg.textContent = res.message;
+    });
+  </script>
+</body>
+</html>
