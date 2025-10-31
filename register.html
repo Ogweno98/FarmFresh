@@ -3,59 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Register — FamFresh</title>
+  <title>Login — FamFresh</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-green-50 min-h-screen flex items-center justify-center">
   <div class="bg-white p-6 rounded shadow w-80">
-    <h1 class="text-xl font-bold mb-4">Register</h1>
+    <h1 class="text-xl font-bold mb-4">Login to FamFresh</h1>
     <div class="space-y-3">
-      <input id="name" type="text" placeholder="Name" class="w-full border px-3 py-2 rounded">
       <input id="email" type="email" placeholder="Email" class="w-full border px-3 py-2 rounded">
       <input id="password" type="password" placeholder="Password" class="w-full border px-3 py-2 rounded">
-      <select id="role" class="w-full border px-3 py-2 rounded">
-        <option value="buyer">Buyer</option>
-        <option value="farmer">Farmer</option>
-      </select>
-      <button id="registerBtn" class="w-full bg-green-700 text-white py-2 rounded">Register</button>
-      <p class="text-xs text-gray-500 text-center">Already have an account? <a href="login.html" class="text-blue-600">Login</a></p>
-      <p id="regMsg" class="text-red-500 text-xs"></p>
+      <button id="loginBtn" class="w-full bg-green-700 text-white py-2 rounded">Login</button>
+      <p class="text-xs text-gray-500 text-center">Don't have an account? <a href="register.html" class="text-blue-600">Register</a></p>
+      <p id="loginMsg" class="text-red-500 text-xs"></p>
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-  <!-- Your combined app JS -->
   <script src="app-full.js"></script>
-
   <script>
-    function initRegister() {
-      if (!window.appAuth) {
-        setTimeout(initRegister, 50); // wait until appAuth is ready
-        return;
-      }
+    const loginBtn = document.getElementById('loginBtn');
+    const loginMsg = document.getElementById('loginMsg');
 
-      const registerBtn = document.getElementById('registerBtn');
-      const regMsg = document.getElementById('regMsg');
-
-      registerBtn.addEventListener('click', async () => {
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const role = document.getElementById('role').value;
-        const res = await appAuth.register({ name, email, password, role });
-        if (res.success) {
-          if (role === 'admin') window.location.href = 'admin-dashboard.html';
-          else if (role === 'farmer') window.location.href = 'farmer-dashboard.html';
-          else window.location.href = 'buyer-dashboard.html';
-        } else regMsg.textContent = res.message;
-      });
-    }
-
-    window.onload = initRegister;
+    loginBtn.addEventListener('click', async () => {
+      if (!window.appAuth) { loginMsg.textContent = "App not loaded yet. Refresh page."; return; }
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      loginMsg.textContent = "Logging in...";
+      const res = await appAuth.login(email, password);
+      if (res.success) {
+        if (res.role === 'admin') window.location.href = 'admin-dashboard.html';
+        else if (res.role === 'farmer') window.location.href = 'farmer-dashboard.html';
+        else window.location.href = 'buyer-dashboard.html';
+      } else loginMsg.textContent = res.message;
+    });
   </script>
 </body>
 </html>
