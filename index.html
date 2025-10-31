@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FamFresh | Farm-to-Market Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script defer src="app-full.js"></script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+  <!-- Navbar -->
+  <header class="bg-green-700 text-white p-4 flex justify-between items-center shadow">
+    <h1 class="font-bold text-xl">FamFresh</h1>
+    <nav class="space-x-6">
+      <a href="login.html" class="hover:underline">Login</a>
+      <a href="register.html" class="bg-yellow-400 text-black px-3 py-1 rounded">Join Now</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="text-center p-10 bg-gradient-to-br from-green-600 to-green-400 text-white">
+    <h2 class="text-4xl font-bold mb-3">Connecting Farmers and Buyers Easily</h2>
+    <p class="text-lg mb-6">Buy fresh produce directly from trusted farmers — supporting sustainable farming.</p>
+    <a href="register.html" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300">Get Started</a>
+  </section>
+
+  <!-- Features -->
+  <section class="p-8 grid md:grid-cols-3 gap-8">
+    <div class="bg-white p-6 rounded-lg shadow-md service-card">
+      <h3 class="text-xl font-semibold mb-2 text-green-700">Direct Farm Access</h3>
+      <p class="text-gray-700">Buyers connect directly to verified farmers and producers near them.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md service-card">
+      <h3 class="text-xl font-semibold mb-2 text-green-700">Sustainable Agriculture</h3>
+      <p class="text-gray-700">We promote eco-friendly practices that improve yields and protect the environment.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md service-card">
+      <h3 class="text-xl font-semibold mb-2 text-green-700">Smart AI Chat</h3>
+      <p class="text-gray-700">Use our FamFresh Helper to get tips on weather, pest control, and storage.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-green-800 text-white text-center p-4 mt-auto">
+    &copy; 2025 FamFresh. All rights reserved. | Powered by JOMPO Digital Solutions
+  </footer>
+
+  <div id="chatbot-root"></div>
+</body>
+</html>
