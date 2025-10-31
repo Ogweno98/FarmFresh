@@ -55,71 +55,49 @@ auth.onAuthStateChanged(async (user) => {
   }
 });
 
-/* =================== Product & Cart Logic =================== */
-const appData = {
-  async addProduct({ name, price, unit, category, description, imageDataUrl, ownerEmail }) {
-    await db.collection('products').add({ name, price, unit, category, description, image: imageDataUrl, owner: ownerEmail, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  },
-  async getProducts() {
-    const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  },
-  async removeProduct(id) { await db.collection('products').doc(id).delete(); },
-  async updateProduct(id, updates) { await db.collection('products').doc(id).update(updates); },
-  async seedIfEmpty() {
-    const prods = await this.getProducts();
-    if (prods.length > 0) return;
-    const demo = [
-      { name: 'Tomatoes', price: 50, unit: 'kg', category:'Vegetables', description:'Fresh red tomatoes', image:'', owner:'demo@famfresh.com' },
-      { name: 'Mangoes', price: 120, unit: 'kg', category:'Fruits', description:'Sweet mangoes', image:'', owner:'demo@famfresh.com' },
-    ];
-    for(const p of demo) await this.addProduct(p);
-  }
-};
-
 /* ================= Cart Functions ================= */
 const cartAPI = {
-  getCart(){ return JSON.parse(localStorage.getItem('cart')||'[]'); },
-  addItem(item){
+  getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); },
+  addItem(item) {
     let arr = this.getCart();
-    const idx = arr.findIndex(i=>i.id===item.id);
-    if(idx>-1) arr[idx].quantity += item.quantity || 1;
-    else arr.push({...item, quantity: item.quantity || 1});
+    const idx = arr.findIndex(i => i.id === item.id);
+    if (idx > -1) arr[idx].quantity += item.quantity || 1;
+    else arr.push({ ...item, quantity: item.quantity || 1 });
     localStorage.setItem('cart', JSON.stringify(arr));
   },
-  removeItem(idx){
-    let arr = this.getCart(); arr.splice(idx,1); localStorage.setItem('cart', JSON.stringify(arr));
+  removeItem(idx) {
+    let arr = this.getCart(); arr.splice(idx, 1); localStorage.setItem('cart', JSON.stringify(arr));
   },
-  clearCart(){ localStorage.removeItem('cart'); },
-  getTotal(){ return this.getCart().reduce((sum,i)=>sum+i.price*i.quantity,0); }
+  clearCart() { localStorage.removeItem('cart'); },
+  getTotal() { return this.getCart().reduce((sum, i) => sum + i.price * i.quantity, 0); }
 };
 
 /* ================= Weather Helper ================= */
 const OPENWEATHER_API_KEY = "OPENWEATHER_API_KEY"; // Replace with your key
-async function getLocalWeatherText(){
-  try{
-    if(!navigator.geolocation) return 'Geolocation not supported by your browser.';
+async function getLocalWeatherText() {
+  try {
+    if (!navigator.geolocation) return 'Geolocation not supported by your browser.';
     const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000 }));
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
-    if(!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'OPENWEATHER_API_KEY') return 'OpenWeather key not configured.';
+    if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'OPENWEATHER_API_KEY') return 'OpenWeather key not configured.';
     const resp = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`);
-    if(!resp.ok) return 'Weather fetch failed.';
+    if (!resp.ok) return 'Weather fetch failed.';
     const data = await resp.json();
-    let advice='';
-    if(data.main.temp>30) advice+='Hot weather — protect seedlings from sun. ';
-    if((data.weather[0].main||'').toLowerCase().includes('rain')) advice+='Rain expected — protect harvest and avoid field work. ';
-    if(data.wind && data.wind.speed>8) advice+='Windy — stake tall crops. ';
-    if(!advice) advice='No immediate weather actions needed.';
+    let advice = '';
+    if (data.main.temp > 30) advice += 'Hot weather — protect seedlings from sun. ';
+    if ((data.weather[0].main || '').toLowerCase().includes('rain')) advice += 'Rain expected — protect harvest and avoid field work. ';
+    if (data.wind && data.wind.speed > 8) advice += 'Windy — stake tall crops. ';
+    if (!advice) advice = 'No immediate weather actions needed.';
     return `Weather: ${data.name} — ${data.weather[0].description}, ${data.main.temp}°C. Advice: ${advice}`;
-  }catch(e){ console.error(e); return 'Unable to get local weather. Allow location or try again.'; }
+  } catch (e) { console.error(e); return 'Unable to get local weather. Allow location or try again.'; }
 }
 
 /* ================= Buyer / Farmer Chatbot ================= */
 const OPENAI_CHAT_ENDPOINT = "OPENAI_CHAT_ENDPOINT"; // replace with your endpoint
-(function createChatUI(rootId='chatbot-root'){
+(function createChatUI(rootId = 'chatbot-root') {
   let root = document.getElementById(rootId);
-  if(!root) root=document.body.appendChild(document.createElement('div'));
-  root.innerHTML=`
+  if (!root) root = document.body.appendChild(document.createElement('div'));
+  root.innerHTML = `
     <div class="chat-bubble fixed right-5 bottom-5 z-50">
       <div id="chatHeader" class="bg-gradient-to-br from-green-700 to-yellow-500 text-white p-3 rounded-t-xl shadow cursor-pointer">FamFresh Helper</div>
       <div class="chat-window hidden bg-white rounded-b-xl shadow p-3 w-80 max-w-xs">
@@ -137,66 +115,35 @@ const OPENAI_CHAT_ENDPOINT = "OPENAI_CHAT_ENDPOINT"; // replace with your endpoi
   const sendBtn = root.querySelector('#sendBtn');
   const chatInput = root.querySelector('#chatInput');
   const messagesEl = root.querySelector('#chatMessages');
-  header.addEventListener('click', ()=> windowEl.classList.toggle('hidden'));
-  function addMessage(role, text){
-    messagesEl.innerHTML += `<div class="${role==='bot'?'text-sm text-gray-800':'text-sm text-green-700'}"><strong>${role==='bot'?'FamFresh':'You'}:</strong> ${text}</div>`;
+  header.addEventListener('click', () => windowEl.classList.toggle('hidden'));
+  function addMessage(role, text) {
+    messagesEl.innerHTML += `<div class="${role === 'bot' ? 'text-sm text-gray-800' : 'text-sm text-green-700'}"><strong>${role === 'bot' ? 'FamFresh' : 'You'}:</strong> ${text}</div>`;
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-  async function getAIReply(prompt){
-    if(!OPENAI_CHAT_ENDPOINT || OPENAI_CHAT_ENDPOINT === 'OPENAI_CHAT_ENDPOINT') return 'AI endpoint not configured.';
-    try{
-      const r = await fetch(OPENAI_CHAT_ENDPOINT, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ prompt }) });
+  async function getAIReply(prompt) {
+    if (!OPENAI_CHAT_ENDPOINT || OPENAI_CHAT_ENDPOINT === 'OPENAI_CHAT_ENDPOINT') return 'AI endpoint not configured.';
+    try {
+      const r = await fetch(OPENAI_CHAT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
       const data = await r.json();
-      if(r.ok && data.reply) return data.reply;
+      if (r.ok && data.reply) return data.reply;
       return data.error || 'No reply from AI.';
-    }catch(err){ console.error(err); return 'AI service error — try again later.'; }
+    } catch (err) { console.error(err); return 'AI service error — try again later.'; }
   }
-  sendBtn.addEventListener('click', async ()=>{
-    const prompt = chatInput.value.trim(); if(!prompt) return;
-    addMessage('user', prompt); chatInput.value='';
-    addMessage('bot','Thinking...');
+  sendBtn.addEventListener('click', async () => {
+    const prompt = chatInput.value.trim(); if (!prompt) return;
+    addMessage('user', prompt); chatInput.value = '';
+    addMessage('bot', 'Thinking...');
     const reply = await getAIReply(prompt);
     messagesEl.removeChild(messagesEl.lastElementChild);
     addMessage('bot', reply);
   });
-  window.appChat = window.appChat||{};
-  window.appChat.addMessage=(r,t)=>addMessage(r,t);
-  window.appChat.getReply=async(q)=>{
-    addMessage('user',q); addMessage('bot','Thinking...');
+  window.appChat = window.appChat || {};
+  window.appChat.addMessage = (r, t) => addMessage(r, t);
+  window.appChat.getReply = async (q) => {
+    addMessage('user', q); addMessage('bot', 'Thinking...');
     const rep = await getAIReply(q);
     messagesEl.removeChild(messagesEl.lastElementChild);
-    addMessage('bot',rep); return rep;
+    addMessage('bot', rep); return rep;
   };
-  window.appChat.fetchLocalWeatherAndTips=async()=>{ if(typeof getLocalWeatherText==='function') return await getLocalWeatherText(); return 'Weather helper not configured.'; };
+  window.appChat.fetchLocalWeatherAndTips = async () => { if (typeof getLocalWeatherText === 'function') return await getLocalWeatherText(); return 'Weather helper not configured.'; };
 })();
-
-/* ================= Admin Chatbot ================= */
-(function createAdminChatUI(rootId='chatbot-root'){
-  let root = document.getElementById(rootId); if(!root) root=document.body.appendChild(document.createElement('div'));
-  root.innerHTML=`
-    <div class="chat-bubble fixed right-5 bottom-5 z-50">
-      <div id="chatHeaderAdmin" class="bg-gradient-to-br from-green-700 to-yellow-500 text-white p-3 rounded-t-xl shadow cursor-pointer">Admin Chat</div>
-      <div class="chat-window hidden bg-white rounded-b-xl shadow p-3 w-96 max-w-xs">
-        <div id="chatMessagesAdmin" class="h-64 overflow-auto text-sm space-y-2"></div>
-        <div class="mt-3 flex gap-2">
-          <input id="chatInputAdmin" placeholder="Reply to user queries..." class="flex-1 border rounded px-3 py-2"/>
-          <button id="sendBtnAdmin" class="bg-green-700 text-white px-3 py-2 rounded">Send</button>
-        </div>
-        <div class="mt-2 text-xs text-gray-500">Tip: Admin can type answers or send instructions.</div>
-      </div>
-    </div>
-  `;
-  const header=root.querySelector('#chatHeaderAdmin'), windowEl=root.querySelector('.chat-window'), sendBtn=root.querySelector('#sendBtnAdmin'), chatInput=root.querySelector('#chatInputAdmin'), messagesEl=root.querySelector('#chatMessagesAdmin');
-  header.addEventListener('click', ()=> windowEl.classList.toggle('hidden'));
-  function addMessage(role,text){ messagesEl.innerHTML += `<div class="${role==='bot'?'text-sm text-gray-800':'text-sm text-green-700'}"><strong>${role==='bot'?'User':'Admin'}:</strong> ${text}</div>`; messagesEl.scrollTop = messagesEl.scrollHeight; }
-  async function getAIReply(prompt){
-    if(!OPENAI_CHAT_ENDPOINT || OPENAI_CHAT_ENDPOINT==='OPENAI_CHAT_ENDPOINT') return 'AI endpoint not configured.';
-    try{ const r=await fetch(OPENAI_CHAT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
-      const data=await r.json(); if(r.ok && data.reply) return data.reply; return data.error||'No reply from AI.'; } catch(e){console.error(e); return 'AI service error — try again later.'; }
-  }
-  sendBtn.addEventListener('click', async()=>{ const prompt=chatInput.value.trim(); if(!prompt) return; addMessage('user',prompt); chatInput.value=''; addMessage('bot','Thinking...'); const reply=await getAIReply(prompt); messagesEl.removeChild(messagesEl.lastElementChild); addMessage('bot',reply); });
-  window.appChatAdmin=window.appChatAdmin||{};
-  window.appChatAdmin.addMessage=(r,t)=>addMessage(r,t);
-  window.appChatAdmin.getReply=async(q)=>{ addMessage('user',q); addMessage('bot','Thinking...'); const rep=await getAIReply(q); messagesEl.removeChild(messagesEl.lastElementChild); addMessage('bot',rep); return rep; };
-  window.appChatAdmin.fetchUserQueries=async()=>{
-    try{ const snap=await db.collection('userQueries').orderBy('createdAt
